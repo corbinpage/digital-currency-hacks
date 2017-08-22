@@ -17,15 +17,32 @@ function queryPrices() {
 	    console.log('BODY: ', body);
 	    var jsonResponse = JSON.parse(body); // turn response into JSON
 
-	    return jsonResponse;
-	    // do stuff with the response and pass it to the callback...
+	    sendNotification(body);
 
-	    callback(sessionAttributes, 
-	        buildSpeechletResponse(intent.name, speechOutput, repromptText,
-	        shouldEndSession));
 	  } else {
-	  	return {};
+	  	return false;
 	  }
+	});
+}
+
+function sendNotification(inputText) {
+	var domain = 'mg.nav-labs.com';
+	var mailgun = require('node_modules/mailgun-js')({apiKey: process.env.MAILGUN_API_KEY, domain: domain});
+	 
+
+	console.log(inputText);
+
+	var data = {
+	  from: 'Corbin Page <corbin.page@gmail.com>',
+	  to: 'corbin.page@gmail.com',
+	  subject: 'Daily Digital Currency Update',
+	  text: inputText
+	};
+	 
+	mailgun.messages().send(data, function (error, body) {
+	  console.log(error);
+	  console.log(body);
+	  return body;
 	});
 }
 

@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "mailgun-js": "^0.13.1",
     "request": "^2.81.0"
   }
 }
