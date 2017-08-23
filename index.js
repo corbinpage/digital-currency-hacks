@@ -1,5 +1,6 @@
-var request = require('request');
-// var request = require('node_modules/request');
+'use strict'
+// var request = require('request');
+var request = require('node_modules/request');
 
 function queryPrices() {
 	request({
@@ -15,10 +16,9 @@ function queryPrices() {
 	  })
 	}, function (error, response, body) {
 	  if (!error && response.statusCode == 200) {
-	    console.log('BODY: ', body);
 	    var jsonResponse = JSON.parse(body); // turn response into JSON
 
-	    sendNotification(body);
+	    sendNotification(jsonResponse);
 
 	  } else {
 	  	return false;
@@ -26,19 +26,17 @@ function queryPrices() {
 	});
 }
 
-function sendNotification(inputText) {
+function sendNotification(inputData) {
 	var domain = 'mg.nav-labs.com';
-	var mailgun = require('mailgun-js')({apiKey: process.env.MAILGUN_API_KEY, domain: domain});
-	// var mailgun = require('node_modules/mailgun-js')({apiKey: process.env.MAILGUN_API_KEY, domain: domain});
+	// var mailgun = require('mailgun-js')({apiKey: process.env.MAILGUN_API_KEY, domain: domain});
+	var mailgun = require('node_modules/mailgun-js')({apiKey: process.env.MAILGUN_API_KEY, domain: domain});
 	 
-
-	console.log(inputText);
 
 	var data = {
 	  from: 'Corbin Page <corbin.page@gmail.com>',
-	  to: 'corbin.page@gmail.com',
+	  to: 'corbin.page@gmail.com, simon.lapscher@consensys.net',
 	  subject: 'Daily Digital Currency Update',
-	  text: inputText
+	  html: returnEmailHtml(inputData)
 	};
 	 
 	mailgun.messages().send(data, function (error, body) {
@@ -119,7 +117,7 @@ function returnEmailHtml(data) {
 												<h1 class="aligncenter" style="font-family: 'Helvetica Neue',Helvetica,Arial,'Lucida Grande',sans-serif; box-sizing: border-box; font-size: 32px; color: #000; line-height: 1.2em; font-weight: 500; text-align: center; margin: 40px 0 0;" align="center">Daily Digital Currency Update</h1>
 											</td>
 										</tr><tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"><td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
-												<h2 class="aligncenter" style="font-family: 'Helvetica Neue',Helvetica,Arial,'Lucida Grande',sans-serif; box-sizing: border-box; font-size: 24px; color: #000; line-height: 1.2em; font-weight: 400; text-align: center; margin: 40px 0 0;" align="center">Refreshed Daily. Trade at your own risk.</h2>
+												<h2 class="aligncenter" style="font-family: 'Helvetica Neue',Helvetica,Arial,'Lucida Grande',sans-serif; box-sizing: border-box; font-size: 24px; color: #000; line-height: 1.2em; font-weight: 400; text-align: center; margin: 40px 0 0;" align="center">Delivered to your inbox each morning.</h2>
 											</td>
 										</tr>
 										<tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
@@ -127,7 +125,7 @@ function returnEmailHtml(data) {
 	`
 										</tr>
 										<tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;"><td class="content-block aligncenter" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; text-align: center; margin: 0; padding: 0 0 20px;" align="center" valign="top">
-												Thanks for stopping by!
+												Have fun, and trade at your own risk.
 											</td>
 										</tr>
 										</table></td>
@@ -146,6 +144,9 @@ function createTable(data) {
 		return '';
 	} else {
 		let colKeys = getColKeys(data[0]);
+		console.log(data);
+		console.log('hi');
+		console.log(data.length);
 		let rows = data.map(d => {
 			return createRow(colKeys, d)
 		})
@@ -184,12 +185,6 @@ function createRow(colKeys, data) {
 	</tr>
 	`
 }
-
-var fs = require('fs');
-var obj = JSON.parse(fs.readFileSync('data.json', 'utf8'));
-
-console.log(returnEmailHtml(obj));
-
 
 exports.handler = function(event, context) {
   queryPrices();
